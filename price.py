@@ -10,6 +10,7 @@ class priceThread(threading.Thread):
         self.symbol = symbol
         self.threadID = threadID
 
+
 def getPrice(sym):
         payload={"symbol":sym}
         priceDict= requests.get("https://api.binance.com/api/v3/ticker/price", payload).json()
