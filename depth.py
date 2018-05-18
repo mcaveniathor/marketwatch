@@ -21,12 +21,20 @@ def getDepth(exchange, symbol1, symbol2):
 
     #Bitfinex
     if exchange == 3:
+        if symbol1 == "USDT":
+            symbol1 = "USD"
         if symbol2 == "USDT":
             symbol2 = "USD"
         symbol = symbol1+symbol2
         depthDict = requests.get(("https://api.bitfinex.com/v1/book/"+symbol)).json()
         highestBid = float(depthDict["bids"][0]["price"])
         lowestAsk = float(depthDict["asks"][0]["price"])
+    #Huobi
+    if exchange == 4:
+        symbol = symbol1+symbol2
+        depthDict = requests.get("https://api.huobipro.com/market/depth", {"symbol": symbol.lower(), "type": "step0"}).json()
+        highestBid = float(depthDict["tick"]["bids"][0][0])
+        lowestAsk = float(depthDict["tick"]["asks"][0][0])
 
     computedPrice = (((highestBid) + (lowestAsk)) / 2.0)
     #Compute the highest bid and lowest ask as a percentage of the calculated price for the given exchange
