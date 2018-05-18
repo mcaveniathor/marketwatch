@@ -3,9 +3,8 @@ import time
 import threading
 import csv
 
-#by default, assume USDT as the second symbol
 #TODO: log depth beyond high bid and low ask
-def getDepth(exchange, symbol1, symbol2="USDT"):
+def getDepth(exchange, symbol1, symbol2):
     highestBid = 0.0
     lowestAsk = 0.0
     tickerPrice = 0.0
@@ -33,16 +32,37 @@ def getDepth(exchange, symbol1, symbol2="USDT"):
     #print("Lowest ask as a percentage of computed price : " + str(lowestAskPercent))
     return({"exchange": exchange, "symbol": symbol, "price": computedPrice, "highestBidPercent": highestBidPercent, "lowestAskPercent": lowestAskPercent, "bidAskSpread": bidAskSpread, "time": time.time()})
 
-def writeDepth(filename, exchange, symbol1, symbol2, iterations):
+
+endFlag = False
+threadLock = threading.Lock()
+class endThread(threading.Thread):
+    def __init__(self, t):
+        threading.Thread.__init__(self)
+        self.t = t
+    def run(self):
+        global endFlag
+        threadLock.acquire()
+        time.sleep(self.t)
+        endFlag = True
+        threadLock.release()
+
+def writeDepth(filename, exchange, symbol1, symbol2, t, log):
     with open(filename, "a") as depthCSV:
         fieldNames = ["exchange", "symbol", "price", "highestBidPercent", "lowestAskPercent", "bidAskSpread", "time"]
         depthWriter = csv.DictWriter(depthCSV, fieldnames = fieldNames)
-        if iterations == -1:
+        if t == -1:
             while True:
-                depthWriter.writerow(getDepth(exchange, symbol1, symbol2))
+                row = getDepth(exchange, symbol1, symbol2)
+                depthWriter.writerow(row)
+                if log:
+                    print(row)
                 time.sleep(.1)
         else:
-            for i in range(0, iterations):
-                depthWriter.writerow(getDepth(exchange, symbol1, symbol2))
+            end = endThread(t)
+            end.start()
+            while not endFlag:
+                row = getDepth(exchange, symbol1, symbol2)
+                depthWriter.writerow(row)
+                if log:
+                    print(row)
                 time.sleep(.1)
-
