@@ -51,21 +51,47 @@ def getDepth(exchange, symbol1, symbol2):
     #print("Highest bid as a percentage of computed price : " + str(highestBidPercent))
     #print("Lowest ask as a percentage of computed price : " + str(lowestAskPercent))
     return({"exchange": exchange, "symbol": symbol, "price": computedPrice,
-            "highestBidPercent": highestBidPercent, "lowestAskPercent": lowestAskPercent, "bidAskSpread": bidAskSpread, "time": time.time()})
+            "highestBidPercent": highestBidPercent, "lowestAskPercent": lowestAskPercent, 
+            "bidAskSpread": bidAskSpread, "time": time.time()})
 
 
-endFlag = False
+#each scraperThread pulls and writes data for  given exchange concurrently
 threadLock = threading.Lock()
+class scraperThread(threading.Thread):
+    def __init__(self, filename, exchange, symbol1, symbol2, t, log):
+        threading.Thread.__init__(self)
+        self.filename = filename
+        self.exchange = exchange
+        self.symbol1 = symbol1
+        self.symbol2 = symbol2
+        self.t = t
+        self.log = log
+    def run(self):
+        threadLock.acquire()
+        writeDepth(self.filename, self.exchange, self.symbol1, self.symbol2, self.t, self.log)
+        threadLock.release()
+
+#Create an array of scraperThreads -- one for each exchange
+def spawnThreads(filename, exchanges, symbol1, symbol2, t, log):
+    threads = []
+    for exchange in exchanges:
+        thread = scraperThread(filename, exchanges, symbol1, symbol2, t, log)
+        threads.append(thread)
+        thread.start()
+
+#used to timeout the writeDepth function when it is passed a t parameter which is not -1
+endFlag = False
+timeLock = threading.Lock()
 class endThread(threading.Thread):
     def __init__(self, t):
         threading.Thread.__init__(self)
         self.t = t
     def run(self):
         global endFlag
-        threadLock.acquire()
+        timeLock.acquire()
         time.sleep(self.t)
         endFlag = True
-        threadLock.release()
+        timeLock.release()
 
 def writeDepth(filename, exchange, symbol1, symbol2, t, log):
     with open(filename, "a") as depthCSV:

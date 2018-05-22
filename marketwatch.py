@@ -21,7 +21,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__, version="marketwatch 0.1")
 
 if arguments["watch"]:
-    depth.writeDepth(arguments["--filename"], int(arguments["--exchange"]), arguments["<symbol1>"], arguments["--symbol2"], float(arguments["--time"]), arguments["--print"])
+    depth.spawnThreads(arguments["--filename"], int(arguments["--exchange"]), arguments["<symbol1>"], arguments["--symbol2"], float(arguments["--time"]), arguments["--print"])
 
 if arguments["clear"]:
     f = open(arguments["--filename"], "w")
