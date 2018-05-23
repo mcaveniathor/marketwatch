@@ -1,29 +1,27 @@
 #!/usr/bin/python3
-"""marketwatch
-Usage:
-    marketwatch.py watch [--print] [--filename=<filename>] [--exchange=<exchange>] <symbol1> [--symbol2=<symbol2>] [--time=<time>]
-    marketwatch.py clear [<filename>]
-    marketwatch.py -h | --help
-Options:
-    --print                 print data to standard output [default: True]
-    --filename=<filename>   output csv data to specified file [default: depth.csv]
-    --exchange=<exchange>   pull data from specified exchange [default: 1]
-    --symbol2=<symbol2>     specify the second symbol [default: USDT]
-    --time=<time>           run for a specified time in seconds or set to -1 to run indefinitely [default: -1]
-    -h --help               show this screen
-"""
-
-from docopt import docopt
 import depth
-import time
+import opencl
 
 if __name__ == "__main__":
-    arguments = docopt(__doc__, version="marketwatch 0.1")
+    symbol1 = "BTC"
+    symbol2 = "USDT"
+    choice = ""
+    default = ""
+    debug = True
+    d = ""
 
-if arguments["watch"]:
-    depth.spawnThreads(arguments["--filename"], int(arguments["--exchange"]), arguments["<symbol1>"], arguments["--symbol2"], float(arguments["--time"]), arguments["--print"])
+    while not (default == "y" or default == "n"):
+        default = input("Default options? y/n\n").lower()
+    if default == "n":
+        while not (choice == "y" or choice == "n"):
+            choice = input("Use symbols BTC/USDT? y/n\n").lower()
+        if not (choice == "y"):
+            symbol1 = input("Please enter the first symbol.n\n")
+            symbol2 = input("Please enter the second symbol.\n")
+        while not (d == "y" or d == "n"):
+            d = input("Debug? y/n\n").lower()
+        if d == "n":
+            debug = False
+    opencl.run(symbol1, symbol2, debug)
 
-if arguments["clear"]:
-    f = open(arguments["--filename"], "w")
-    f.write("exchange, symbol, price, highestBidPercent, highestAskPercent, bidAskSpread, time\n")
-    f.close()
+

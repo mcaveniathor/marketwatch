@@ -8,6 +8,8 @@ name = "pypi"
 [packages]
 docopt = "*"
 requests = "*"
+pyopencl = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.6"
