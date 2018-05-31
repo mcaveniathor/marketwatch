@@ -13,4 +13,5 @@ A Python program which requests current trading data for a given trading pair fr
 Follow the instructions located in the [pipenv documentation](https://docs.pipenv.org/install/), then run 
 `pipenv install`
 ### To run:
+`pipenv shell`
 `pipenv run marketwatch.py`
