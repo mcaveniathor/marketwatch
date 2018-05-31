@@ -14,4 +14,5 @@ Follow the instructions located in the [pipenv documentation](https://docs.pipen
 `pipenv install`
 ### To run:
 `pipenv shell`
+then
 `pipenv run marketwatch.py`
