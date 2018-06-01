@@ -5,16 +5,19 @@ import numpy as np
 import depth
 
 def run(symbol1, symbol2, debug):
-    depthData = depth.getDepth(symbol1, symbol2, debug)
-    depthData = depthData.flatten()
-    print(depthData)
-    dest = np.empty_like(depthData.shape)
+    binanceDepth = depth.getDepth("binance", 20, symbol1, symbol2, debug)
+    np.savetxt("binance.csv", binanceDepth, header="bid,bidquantity,ask,askquantity")
+    bitfinexDepth = depth.getDepth("bitfinex", 20, symbol1, symbol2, debug)
+    np.savetxt("bitfinex.csv", bitfinexDepth, header="bid,bidquantity,ask,askquantity")
+    huobiDepth = depth.getDepth("huobi", 20, symbol1, symbol2, debug)
+    np.savetxt("huobi.csv", huobiDepth, header="bid,bidquantity,ask,askquantity")
     computed_data = np.empty((3,1))
     platforms = cl.get_platforms()
     gpus = platforms[0].get_devices(cl.device_type.ALL)
     device = gpus[0]
     context = cl.Context([device])
-    program = cl.Program(context, """
+    # program = cl.Program(context, """
+    """
     __kernel void percentage_price(__global const float *input, __global float *computed_data, __global float *output)
     {
         __local float tmp[80];
@@ -34,7 +37,9 @@ def run(symbol1, symbol2, debug):
         }
         barrier(CLK_LOCAL_MEM_FENCE);
     }
-    """).build()
+    """ #).build()
+
+    """
     queue = cl.CommandQueue(context)
     mem_flags = cl.mem_flags
     depth_buf = cl.Buffer(context, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf = depthData)
@@ -47,3 +52,4 @@ def run(symbol1, symbol2, debug):
     print(dest)
     print(depthData[0])
     print(depthData[40])
+    """
