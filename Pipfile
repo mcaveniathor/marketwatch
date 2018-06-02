@@ -6,10 +6,13 @@ name = "pypi"
 [dev-packages]
 
 [packages]
-docopt = "*"
-requests = "*"
 pyopencl = "*"
 numpy = "*"
+asyncio = "*"
+uvloop = "*"
+aiohttp = "*"
+ujson = "*"
+requests = "*"
 
 [requires]
 python_version = "3.6"

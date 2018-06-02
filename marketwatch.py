@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 import depth
 import opencl
+import asyncio
+import uvloop
 
-if __name__ == "__main__":
+async def main():
     symbol1 = "BTC"
     symbol2 = "USDT"
     choice = ""
@@ -27,6 +29,12 @@ if __name__ == "__main__":
         symbol2 = "USDT"
         quantity = 100
     print("\033[2J\f")
-    opencl.run(symbol1, symbol2, quantity)
+    await opencl.run(symbol1, symbol2, quantity)
 
-
+if __name__ == "__main__":
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(main())
+    finally:
+        loop.close()
