@@ -1,9 +1,7 @@
-#!/usr/bin/python3
 import pyopencl as cl
 from pyopencl import array
 import numpy as np
 import asyncio
-import uvloop
 import depth
 
 
@@ -11,13 +9,17 @@ async def run(symbol1, symbol2, quantity):
     a_np, b_np = await depth.getDepth(symbol1, symbol2, quantity)
     #Define OpenCL kernel
     source = """
-    __kernel void getLocalID(__global const float4 *a_g, __global const float *b_g, __global float4 *res_g)
+    __kernel void depthPercentage(__global const float4 *a_g, __global const float *b_g, __global float4 *res_g)
     {
-        float price = b_g[get_group_id(0)];
         int gid = get_global_id(0);
+        int groupid = get_group_id(0);
+        float price = b_g[groupid];
         float4 vec = a_g[gid];
-        res_g[gid].x = (vec.x/price)*100;
-        res_g[gid].z = (vec.z/price)*100;
+        float scalar = (1.0/price) * 100;
+        vec.x *= scalar;
+        vec.z *= scalar;
+        res_g[gid] = vec;
+
     }
     """
     #OpenCL initialization using first GPU
@@ -35,7 +37,7 @@ async def run(symbol1, symbol2, quantity):
     #Compile OpenCL program
     prg = cl.Program(ctx, source).build()
     #Execute OpenCL program
-    ker = prg.getLocalID
+    ker = prg.depthPercentage
     ker.set_arg(0, a_g)
     ker.set_arg(1, b_g)
     ker.set_arg(2, res_g)
