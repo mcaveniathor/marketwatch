@@ -38,6 +38,7 @@ async def run(symbol1, symbol2, quantity, iterations, delay):
     if iterations == -1:
         forever = True
     while forever or iterations > 0:
+        print("test")
         a_np, b_np, exchanges = await depth.getDepth(symbol1, symbol2, quantity)
         a_g = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf = a_np)
         b_g = cl.Buffer(ctx, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf = b_np)
